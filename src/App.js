@@ -33,18 +33,20 @@ function formatDay(dateStr) {
 }
 
 class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      location: "lisbon",
-      isLoading: false,
-      displayLocation: "",
-      weather: {},
-    };
-    this.fetchWeather = this.fetchWeather.bind(this);
-  }
+  state = {
+    location: "lisbon",
+    isLoading: false,
+    displayLocation: "",
+    weather: {},
+  };
 
-  async fetchWeather() {
+  // constructor(props) {
+  //   super(props);
+
+  //   this.fetchWeather = this.fetchWeather.bind(this);
+  // }
+
+  fetchWeather = async () => {
     console.log("Loading weather");
     console.log(this);
     try {
@@ -75,7 +77,7 @@ class App extends React.Component {
     } finally {
       this.setState({ isLoading: false });
     }
-  }
+  };
   render() {
     return (
       <div className="app">
@@ -92,9 +94,58 @@ class App extends React.Component {
           Get Weather
         </button>
         {this.state.isLoading && <p className="loader">Loading...</p>}
+
+        {this.state.weather.weathercode && (
+          <Weather
+            weather={this.state.weather}
+            location={this.state.displayLocation}
+          />
+        )}
       </div>
     );
   }
 }
 
 export default App;
+
+class Weather extends React.Component {
+  render() {
+    const {
+      temperature_2m_max: max,
+      temperature_2m_min: min,
+      time: dates,
+      weathercode: codes,
+    } = this.props.weather;
+    return (
+      <div>
+        <h1>Weather {this.props.location}</h1>
+        <ul className="weather">
+          {dates.map((date, i) => (
+            <Date
+              date={date}
+              max={max.at(i)}
+              min={min.at(i)}
+              code={codes.at(i)}
+              key={date}
+            />
+          ))}
+        </ul>
+      </div>
+    );
+  }
+}
+
+class Date extends React.Component {
+  render() {
+    const { date, max, min, code } = this.props;
+    return (
+      <li className="day">
+        <span>{getWeatherIcon(code)}</span>
+        <p>{date}</p>
+        <p>
+          {Math.floor(min)} &deg; &mdash; {Math.ceil(max)}&deg;
+        </p>
+      </li>
+    );
+  }
+}
